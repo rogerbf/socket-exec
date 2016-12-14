@@ -1,5 +1,5 @@
-export default ({ configuration, dependencies }) => {
-  return dependencies.reduce(
-    (core, factory) => ({ ...core, ...factory(configuration) }), {}
-  )
+export default ({ configuration = {}, dependencies = [] } = {}) => {
+  return dependencies.reduce((core, factory) => {
+    return { ...core, ...factory(configuration) }
+  }, {})
 }

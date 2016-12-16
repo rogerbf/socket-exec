@@ -7,7 +7,7 @@ const defaultDependencies = [
 
 export default (configuration = {}, dependencies = defaultDependencies) => {
   return createCore({
-    configuration: { ...configuration, end: undefined },
+    configuration: { ...configuration },
     dependencies
   })
 }

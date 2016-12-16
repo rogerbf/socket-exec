@@ -1,13 +1,21 @@
-import createCore from './library/createCore'
+import { createConnection } from 'net'
 import execute from './library/execute'
 
-const defaultDependencies = [
-  execute
-]
+const defaultOptions = {
+  dependencies: {
+    createConnection,
+    execute
+  }
+}
 
-export default (configuration = {}, dependencies = defaultDependencies) => {
-  return createCore({
-    configuration: { ...configuration },
-    dependencies
-  })
+const throwError = error => { throw error }
+
+export default (userOptions) => {
+  !userOptions &&
+  throwError(TypeError(`missing an argument, maybe a port or a path?`))
+
+  return (instructions = []) => {
+    const options = { ...defaultOptions, ...userOptions, instructions }
+    return options.dependencies.execute(options)
+  }
 }

@@ -11,7 +11,7 @@ export default (configuration, connect = createConnection) => ({
         instructions.map(instruction => socket.write(instruction))
       )
       socket.on(`error`, error => reject(error))
-      socket.on(`timeout`, () => socket.destroy(`timeout reached`))
+      socket.on(`timeout`, () => socket.destroy(Error(`Timeout`)))
 
       socket.pipe(concatStream)
     })

@@ -8,23 +8,76 @@ it(`returns an object containing a function: execute`, () => {
 })
 
 it(`resolves with the expected result`, () => {
+  const on = jest.fn((eventName, fn) => {
+    eventName === `connect` && fn()
+  })
   const createConnection = jest.fn(() => {
-    return new Readable({
-      read () {
-        this.push(`hello`)
-        this.push(null)
-      }
-    })
+    const socket = Object.assign(
+      new Readable({
+        read () {}
+      }),
+      { write: data => socket.push(data) },
+      { on }
+    )
+    return socket
   })
   const exec = execute({ port: 9055 }, createConnection)
-  expect(exec.hasOwnProperty(`execute`)).toBeTruthy()
   const instructions = [ `hello` ]
   const errorHandler = error => { expect(error).toBeFalsy() }
   const successHandler = result => {
     expect(result).toEqual(Buffer.from(`hello`))
     expect(createConnection.mock.calls[0][0]).toEqual({ port: 9055 })
+    expect(on.mock.calls.length).toEqual(2)
   }
   exec.execute(instructions)
+    .then(successHandler)
+    .catch(errorHandler)
+})
+
+it(`rejects after timeout`, () => {
+  const on = jest.fn((eventName, fn) => {
+    eventName === `timeout` && fn()
+  })
+  const destroy = jest.fn()
+  const createConnection = jest.fn(() => {
+    const socket = Object.assign(
+      new Readable({
+        read () {}
+      }),
+      { write: data => socket.push(data) },
+      { on, destroy }
+    )
+    return socket
+  })
+  const exec = execute({ port: 9055 }, createConnection)
+  const errorHandler = error => {
+    expect(error).toBeTruthy()
+    expect(destroy.mock.calls.length).toEqual(1)
+  }
+  const successHandler = result => expect(result).toBeFalsy()
+  exec.execute([ `hello` ])
+    .then(successHandler)
+    .catch(errorHandler)
+})
+
+it(`rejects on error`, () => {
+  const on = jest.fn((eventName, fn) => {
+    eventName === `error` && fn(`something went wrong`)
+  })
+  const createConnection = jest.fn(() => {
+    const socket = Object.assign(
+      new Readable({
+        read () {}
+      }),
+      { write: data => socket.push(data) },
+      { on }
+    )
+    return socket
+  })
+  const exec = execute({ port: 9055 }, createConnection)
+  const errorHandler = error => expect(error).toEqual(`something went wrong`)
+  const successHandler = result => expect(result).toBeFalsy()
+  exec.execute()
     .then(successHandler)
     .catch(errorHandler)
 })

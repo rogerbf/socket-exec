@@ -3,9 +3,9 @@ import { Readable } from 'stream'
 
 it(`exports a function`, () => expect(typeof (execute)).toEqual(`function`))
 
-it(`returns an object containing a function: execute`, () => {
-  expect(typeof (execute().execute)).toEqual(`function`)
-})
+// it(`returns an object containing a function: execute`, () => {
+//   expect(typeof (execute().execute)).toEqual(`function`)
+// })
 
 it(`resolves with the expected result`, () => {
   const on = jest.fn((eventName, fn) => {
@@ -21,7 +21,7 @@ it(`resolves with the expected result`, () => {
     )
     return socket
   })
-  const exec = execute({ port: 9055 }, createConnection)
+
   const instructions = [ `hello` ]
   const errorHandler = error => { expect(error).toBeFalsy() }
   const successHandler = result => {
@@ -29,7 +29,7 @@ it(`resolves with the expected result`, () => {
     expect(createConnection.mock.calls[0][0]).toEqual({ port: 9055 })
     expect(on.mock.calls.length).toEqual(2)
   }
-  exec.execute(instructions)
+  execute({ port: 9055, dependencies: { createConnection }, instructions })
     .then(successHandler)
     .catch(errorHandler)
 })
@@ -49,13 +49,13 @@ it(`rejects after timeout`, () => {
     )
     return socket
   })
-  const exec = execute({ port: 9055 }, createConnection)
+
   const errorHandler = error => {
     expect(error).toBeTruthy()
     expect(destroy.mock.calls.length).toEqual(1)
   }
   const successHandler = result => expect(result).toBeFalsy()
-  exec.execute([ `hello` ])
+  execute({ port: 9055, dependencies: { createConnection }, instructions: [ `hello` ] })
     .then(successHandler)
     .catch(errorHandler)
 })
@@ -74,10 +74,10 @@ it(`rejects on error`, () => {
     )
     return socket
   })
-  const exec = execute({ port: 9055 }, createConnection)
+
   const errorHandler = error => expect(error).toEqual(`something went wrong`)
   const successHandler = result => expect(result).toBeFalsy()
-  exec.execute()
+  execute({ port: 9055, dependencies: { createConnection } })
     .then(successHandler)
     .catch(errorHandler)
 })

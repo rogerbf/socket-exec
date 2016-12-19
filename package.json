@@ -1,7 +1,7 @@
 {
   "name": "socket-exec",
   "version": "0.0.1",
-  "description": "write to a socket, get a promise back",
+  "description": "connect to a socket, write data, get a promise back",
   "main": "./distribution/index.js",
   "scripts": {
     "test": "jest --config .jest",

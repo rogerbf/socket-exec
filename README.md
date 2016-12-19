@@ -1,9 +1,9 @@
 # socket-exec
 
-Write data to a socket and get a promise back which:
+Connects to a socket, writes data, returns a Promise which:
 
-- resolves with the response when the connection is closed.
-- rejects if there is an error or an optionally defined timeout.
+- resolves with any received data when the connection is closed.
+- rejects if there is an error or an optionally defined timeout is reached.
 
 ## usage
 
@@ -21,4 +21,4 @@ controlPort([`AUTHENTICATE\r\n`, `HEARTBEAT\r\n`, `QUIT\r\n`])
 
 ### `socketExec(options)`
 
-Options are what `net.createConnection` receives.
+Options are passed on to `net.createConnection`.
